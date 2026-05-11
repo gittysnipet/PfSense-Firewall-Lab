@@ -1,0 +1,55 @@
+Creating Our Security Rules
+
+>>Navigate to: Firewall > Rules > LAN tab<<
+
+Rule 1 — Block SSH (Port 22)
+Why: SSH allows remote command-line access. Attackers use it to take over systems. Blocking it from LAN prevents internal devices from SSH-ing to external servers (common in malware).
+
+Action:           Block
+Interface:        LAN
+Protocol:         TCP
+Source:           LAN net
+Destination:      any
+Destination Port: 22
+Description:      Block SSH outbound
+Log:              Enable
+
+Rule 2 — Block RDP (Port 3389)
+Why: RDP is Windows Remote Desktop. Ransomware attacks frequently use RDP to spread. Blocking it prevents attackers from remotely controlling machines and stops ransomware propagation.
+
+
+Action:           Block
+Interface:        LAN
+Protocol:         TCP
+Source:           LAN net
+Destination:      any
+Destination Port: 3389
+Description:      Block RDP outbound
+Log:              Enable
+
+Rule 3 — Block Telnet (Port 23)
+Why: Telnet sends everything including passwords in plain text with no encryption. It is obsolete and dangerous. Any modern network should block it completely.
+
+Action:           Block
+Protocol:         TCP
+Destination Port: 23
+Description:      Block Telnet - sends passwords in plain text
+
+Rule 4 — Allow HTTP and HTTPS Only
+Why: Web browsing should only use ports 80 (HTTP) and 443 (HTTPS). This is a whitelist approach — only explicitly allowed traffic gets through.
+
+Action:           Pass
+Protocol:         TCP
+Source:           LAN net
+Destination:      any
+Destination Port: HTTP, HTTPS (80, 443)
+Description:      Allow web browsing only
+
+5.6 Correct Rule Order
+Rule order is absolutely critical. Here is the correct order in our lab:
+
+Position	Action	Protocol	Port	Description
+1 (top)	Block	TCP	22	Block SSH first
+2	Block	TCP	3389	Block RDP
+3	Block	TCP	23	Block Telnet
+4	Pass	Any	Any	Allow rest of LAN traffic
