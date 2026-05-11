@@ -1,538 +1,440 @@
-\# 🔐 **PfSense Firewall Security Lab**
+# 🔐 pfSense Firewall Security Lab
 
+## Project Title
 
+**Design and Implementation of a Secure Virtual Network Infrastructure Using pfSense Firewall with Advanced Traffic Filtering, Access Control, and Threat Prevention**
 
-**## Project Title**
+---
 
-Design and Implementation of a Secure Virtual Network
+## 📌 Project Overview
 
-Infrastructure using pfSense Firewall with Advanced
+This project demonstrates the deployment of an enterprise-grade virtual network security lab using **pfSense Firewall** within a **VirtualBox** environment. Multiple virtual machines were configured to simulate a real-world corporate infrastructure, enabling secure network segmentation, traffic monitoring, access control, and automated threat prevention.
 
-Traffic Filtering, Access Control and Threat Prevention
+The lab focuses on practical cybersecurity concepts such as:
 
+- Stateful firewall configuration
+- Threat intelligence integration
+- DNS and DHCP management
+- Network segmentation
+- Real-time traffic monitoring
+- Malware and malicious IP blocking
 
+---
 
-\---
+## 🛠️ Tools & Technologies
 
-
-
-**## 📌 Overview**
-
-Built a complete enterprise-grade network security lab
-
-using pfSense firewall running on VirtualBox with
-
-multiple virtual machines simulating a real company
-
-network environment.
-
-
-
-\---
-
-
-
-\---
-
-
-
-**## 🛠️ Tools and Technologies**
-
-| Tool | Version | Purpose |
-
-|------|---------|---------|
-
-| pfSense | 2.7 | Firewall and Router |
-
-| VirtualBox | 7.0 | Virtualization |
-
-| pfBlockerNG | Latest | IP and DNS Blocking |
-
-| Windows 10 | - | Client Workstation |
-
+| Tool / Technology | Version | Purpose |
+|---|---|---|
+| pfSense | 2.7 | Firewall & Router |
+| VirtualBox | 7.0 | Virtualization Platform |
+| pfBlockerNG | Latest | IP & DNS Threat Blocking |
+| Windows 10 | — | Client Workstation |
 | Ubuntu Linux | 22.04 | Server Environment |
 
+---
 
+# ⚙️ Installation & Initial Setup
 
-\---
+## 2.1 Prerequisites
 
+| Requirement | Minimum | Recommended |
+|---|---|---|
+| RAM for pfSense VM | 512 MB | 1024 MB |
+| Storage for pfSense VM | 4 GB | 8 GB |
+| RAM for Client VMs | 1 GB | 2 GB |
+| Host System RAM | 8 GB | 16 GB |
+| Free Storage Space | 50 GB | 100 GB |
+| VirtualBox Version | 6.x | 7.x (Latest) |
+| pfSense Version | 2.6.x | 2.7.x (Latest) |
 
+---
 
-* ###### &#x20;**Installation and Initial Setup(Adjustable)**
+## 2.2 Installing VirtualBox
 
+1. Download VirtualBox from `https://www.virtualbox.org`
+2. Run the installer using default settings
+3. Install VirtualBox Guest Additions when prompted
+4. Restart the host machine after installation
 
+---
 
-**2.1 Prerequisites — What You Need**
+## 2.3 Downloading pfSense
 
-Requirement		              Minimum		    Recommended
+1. Visit `https://www.pfsense.org/download`
+2. Select:
+   - **Architecture:** AMD64 (64-bit)
+   - **Installer:** DVD Image (ISO) Installer
+3. Download the `.iso.gz` image
+4. Extract the archive using 7-Zip or WinRAR to obtain the `.iso` file
 
-RAM for pfSense VM	        512 MB		    1024 MB
+---
 
-Storage for pfSense VM    	4 GB		      8 GB
+## 2.4 Creating the pfSense Virtual Machine
 
-RAM for each Client VM    	1 GB		      2 GB
+### Step 1 — Create a New VM
 
-Your PC Total RAM	          8 GB	  	    16 GB
-  
-Your PC Storage		          50 GB free  	100 GB free
+1. Open VirtualBox and click **New**
+2. Configure the following:
+   - **Name:** `pfSense-Firewall`
+   - **Type:** BSD
+   - **Version:** FreeBSD (64-bit)
+   - **Memory:** 1024 MB
+3. Create a virtual hard disk:
+   - Size: 8 GB
+   - Format: VDI
+   - Storage Type: Dynamically Allocated
 
-VirtualBox Version	        6.x		        7.x (latest)
+---
 
-pfSense Version	          	2.6.x	       	2.7.x (latest)
+### Step 2 — Configure Network Adapters (Critical)
 
+> ⚠️ Incorrect adapter configuration may prevent client VMs from accessing the internet.
 
+#### Adapter 1 — WAN (Internet Interface)
 
-**2.2 Installing VirtualBox**
+- Enable Network Adapter: **Enabled**
+- Attached To: **NAT**
 
-&#x20;   1. Go to virtualbox.org and download VirtualBox for your operating system
+This adapter provides internet connectivity to pfSense through the host machine.
 
-&#x20;   2. Run the installer and follow all default settings
+![WAN Adapter Configuration](https://github.com/user-attachments/assets/7edf61be-f63c-4152-9bd3-35ef8785aa55)
 
-&#x20;   3. Install VirtualBox Guest Additions when prompted
+---
 
-&#x20;   4. Restart your computer after installation
+#### Adapter 2 — LAN (Internal Network)
 
+- Enable Network Adapter: **Enabled**
+- Attached To: **Internal Network**
+- Network Name: `labnet`
 
+This adapter creates an isolated internal network for client virtual machines.
 
-**2.3 Downloading pfSense**
+![LAN Adapter Configuration](https://github.com/user-attachments/assets/e49aaad4-1866-490c-bfa8-9965787019ac)
 
-&#x20;   5. Go to pfsense.org/download
+---
 
-&#x20;   6. Select: Architecture = AMD64 (64-bit)
+### Why NAT for WAN?
 
-&#x20;   7. Select: Installer = DVD Image (ISO) Installer
+VirtualBox NAT mode automatically provides internet access to the pfSense VM using the host system’s network connection. pfSense typically receives the IP address `10.0.2.15` automatically.
 
-&#x20;   8. Download the .iso.gz file
+---
 
-&#x20;   9. Extract it using 7-Zip or WinRAR to get the .iso file
+### Step 3 — Attach pfSense ISO
 
+1. Open **Settings → Storage**
+2. Select the CD icon under **Controller: IDE**
+3. Choose **Disk File**
+4. Select the downloaded pfSense ISO
+5. Start the VM
 
+---
 
-**2.4 Creating the pfSense Virtual Machine**
+## 2.5 pfSense Installation Process
 
-Step 1 — Create New VM
-
-&#x20;   10. Open VirtualBox and click New
-
-&#x20;   11. Name: pfSense-Firewall
-
-&#x20;   12. Type: BSD
-
-&#x20;   13. Version: FreeBSD (64-bit)
-
-&#x20;   14. RAM: 1024 MB
-
-&#x20;   15. Create a virtual hard disk: 8 GB, VDI format, Dynamically allocated
-
-
-
-**Step 2 — Configure Network Adapters (CRITICAL)**
-
-⚠ This is the most important step. Wrong adapter settings = no internet on client VMs!
-
-
-
-&#x20;   16. Click Settings on your pfSense VM
-
-&#x20;   17. Click Network tab
-
-
-
-Adapter 1 (WAN — Internet Side):
-
-&#x20;   • Enable Network Adapter: CHECKED
-
-&#x20;   • Attached to: NAT
-
-&#x20;   • This gives pfSense access to your real internet
-
-<img width="704" height="384" alt="Virtual Machine Adapter Config (2)" src="https://github.com/user-attachments/assets/7edf61be-f63c-4152-9bd3-35ef8785aa55" />
-
-
-
-Adapter 2 (LAN — Client Side):
-
-&#x20;   • Enable Network Adapter: CHECKED
-
-&#x20;   • Attached to: Internal Network
-
-&#x20;   • Name: labnet
-
-&#x20;   • This creates a private network for client VMs
-
-<img width="967" height="641" alt="Virtual Machine Adapter Config" src="https://github.com/user-attachments/assets/e49aaad4-1866-490c-bfa8-9965787019ac" />
-
-
-
-Why NAT for WAN? VirtualBox NAT gives the VM internet access through your PC's connection without needing any configuration. pfSense receives IP 10.0.2.15 automatically from VirtualBox.
-
-
-
-**Step 3 — Attach pfSense ISO**
-
-&#x20;   18. Settings > Storage
-
-&#x20;   19. Click the CD icon under Controller: IDE
-
-&#x20;   20. Click Choose Disk File and select your pfSense .iso
-
-&#x20;   21. Click OK and Start the VM
-
-
-
-**2.5 pfSense Installation Process**
-
-&#x20;   22. Boot the VM — you will see pfSense boot menu
-
-&#x20;   23. Press Enter to accept default boot option
-
-&#x20;   24. At Copyright screen — press Enter to accept
-
-&#x20;   25. Select Install pfSense
-
-&#x20;   26. Keymap: Select your keyboard layout (usually US default)
-
-&#x20;   27. Partitioning: Select Auto (UFS) — easiest option
-
-&#x20;   28. Wait for installation to complete (2-5 minutes)
-
-&#x20;   29. Select No when asked to open shell
-
-&#x20;   30. Select Reboot
-
-&#x20;   31. After reboot — remove ISO from VirtualBox storage settings
-
-
-
-**2.6 Initial Console Configuration**
-
-After pfSense boots, you will see the console menu. This is where we do basic setup before accessing the web interface.
-
-
-
-**Option 	Menu Item		When to Use**
-
-0	Logout/Disconnect SSH	End session
-
-1	Assign Interfaces	First time setup — assign WAN/LAN
-
-2	Set Interface IP	Configure LAN IP and DHCP
-
-7	Ping Host		Test internet connectivity
-
-8	Shell			Advanced command line access
-
-9	pfTop			Live traffic monitor
-
-10	Filter Logs		View firewall logs in console
-
-11	Restart GUI		Fix web interface issues
-
-14	Enable SSH		Allow SSH remote access
-
-16	Restart PHP-FPM		Fix web GUI loading issues
-
-
-
-Assign Interfaces — Type 1
-
+1. Boot the VM
+2. Press **Enter** to accept the default boot option
+3. Accept the license agreement
+4. Select **Install pfSense**
+5. Choose the appropriate keyboard layout
+6. Select **Auto (UFS)** partitioning
+7. Wait for installation to complete
+8. Select **No** when prompted to open a shell
+9. Reboot the VM
+10. Remove the ISO after reboot
+
+---
+
+## 2.6 Initial Console Configuration
+
+After installation, basic networking is configured from the pfSense console menu.
+
+### Console Menu Options
+
+| Option | Description | Purpose |
+|---|---|---|
+| 1 | Assign Interfaces | Configure WAN/LAN |
+| 2 | Set Interface IP | Configure LAN IP & DHCP |
+| 7 | Ping Host | Test Connectivity |
+| 8 | Shell | Advanced CLI Access |
+| 9 | pfTop | Real-Time Traffic Monitoring |
+| 10 | Filter Logs | View Firewall Logs |
+| 11 | Restart GUI | Fix Web Interface Issues |
+| 14 | Enable SSH | Allow Remote SSH Access |
+
+---
+
+### Assigning Interfaces
+
+```bash
 Enter an option: 1
+Should VLANs be set up now? [y|n]: n
+Enter the WAN interface name: em0
+Enter the LAN interface name: em1
+Proceed? [y|n]: y
+```
 
+---
 
+### Configuring LAN IP Address
 
-**Should VLANs be set up now? \[y|n]: n**
-
-
-
-Enter the WAN interface name: em0  (or vtnet0)
-
-Enter the LAN interface name: em1  (or vtnet1)
-
-
-
-**Do you want to proceed? \[y|n]: y**
-
-
-
-Set LAN IP — Type 2
-
+```bash
 Enter an option: 2
-
 Select interface: 2 (LAN)
 
+LAN IPv4 Address: 192.168.1.1
+Subnet Bit Count: 24
+Enable DHCP Server: y
 
+DHCP Range Start: 192.168.1.100
+DHCP Range End: 192.168.1.200
+```
 
-Enter the new LAN IPv4 address: 192.168.1.1
+![DHCP Configuration](https://github.com/user-attachments/assets/e15c7726-fbcd-41d5-bf87-228f8fae5730)
 
-Enter the subnet bit count: 24
+---
 
-Press ENTER — no upstream gateway for LAN
+### Web GUI Access
 
+After configuration, the pfSense web interface becomes available at:
 
+```bash
+http://192.168.1.1
+```
 
-Enable DHCP server on LAN? \[y|n]: y
+---
 
-Start address: 192.168.1.100
+# 🌐 Accessing the Web GUI
 
-End address: 192.168.1.200
+1. Start the client VM
+2. Open a web browser
+3. Navigate to:
 
-<img width="700" height="341" alt="DHCP-Setting" src="https://github.com/user-attachments/assets/e15c7726-fbcd-41d5-bf87-228f8fae5730" />
+```bash
+http://192.168.1.1
+```
 
+### Default Credentials
 
+| Username | Password |
+|---|---|
+| admin | pfsense |
 
-**Revert to HTTP: y**
+> ⚠️ Change the default password immediately after setup.
 
+![pfSense Dashboard](https://github.com/user-attachments/assets/0db1a0a5-ffcd-441a-8b60-18e27dff67fa)
 
+---
 
-###### ***✓ After this step, pfSense web GUI is available at http://192.168.1.1***
+# 🔒 Security Features Implemented
 
+## 1. Custom Firewall Rules
 
+Implemented strict access control policies to reduce attack exposure.
 
+### Configured Rules
 
+- Blocked SSH (Port 22)
+- Blocked RDP (Port 3389)
+- Blocked Telnet (Port 23)
+- Allowed only HTTP/HTTPS traffic
 
-**## Accessing the Web GUI**
+---
 
-The Web GUI (Graphical User Interface) is how you manage pfSense. It is a web page hosted by pfSense itself.
+### Firewall Rule Processing
 
+pfSense evaluates firewall rules **top to bottom**.  
+The **first matching rule** is applied.
 
+Any traffic not explicitly allowed is automatically denied through the **implicit deny rule**.
 
-1. &#x20;   Start your Client VM (Windows or Linux)
-2. &#x20;   Open any web browser
-3. &#x20;   Type in address bar: http://192.168.1.1
-4. &#x20;   Username: admin
-5. &#x20;   Password: pfsense (default — change this after setup!)
+---
 
-<img width="828" height="761" alt="PfSense-DashBoard" src="https://github.com/user-attachments/assets/0db1a0a5-ffcd-441a-8b60-18e27dff67fa" />
+### Firewall Rule Components
 
+| Component | Example |
+|---|---|
+| Action | Pass / Block / Reject |
+| Interface | LAN / WAN |
+| Protocol | TCP / UDP / ICMP |
+| Source | LAN Net |
+| Destination | Any |
+| Destination Port | 22 / 80 / 443 |
+| Logging | Enabled |
 
+![Firewall Rules](https://github.com/user-attachments/assets/53ee103c-c7f4-4587-8383-c9f2811d2e30)
 
-**## 🔒 Security Features Implemented**
+---
 
+### Block vs Reject
 
+| Action | Behavior | Recommended Usage |
+|---|---|---|
+| Block | Silently drops traffic | WAN Rules |
+| Reject | Sends denial response | LAN Rules |
+| Pass | Allows traffic | Authorized Connections |
 
-\### 1. Custom Firewall Rules
+---
 
-\- Blocked SSH (Port 22) — prevent remote access attacks
+### Firewall Aliases
 
-\- Blocked RDP (Port 3389) — prevent ransomware spread
+Aliases were used to simplify firewall rule management by grouping multiple IP addresses or ports under a single logical name.
 
-\- Blocked Telnet (Port 23) — insecure plain text protocol
+![Firewall Aliases](https://github.com/user-attachments/assets/f267401e-d82d-453b-944a-e92dc7db6c2c)
 
-\- Allow only HTTP/HTTPS traffic
+---
 
+### Blocking IPs Using Aliases
 
+![IP Blocking via Aliases](https://github.com/user-attachments/assets/bf046aa9-3a3e-4948-83ed-83fb7620b600)
 
-###### **How Firewall Rules Work**
+---
 
-Firewall rules are instructions that tell pfSense what to do with network traffic. Each rule matches specific traffic and either allows it (Pass), blocks it (Block), or rejects it (Reject).
+## 2. pfBlockerNG Threat Protection
 
+Implemented automated threat intelligence blocking using pfBlockerNG.
 
+### Features
 
-**CRITICAL RULE:** pfSense processes rules TOP to BOTTOM. The FIRST matching rule wins. All traffic that does not match any rule is BLOCKED by default (implicit deny).
+- Inbound WAN protection
+- Outbound LAN filtering
+- Automatic malicious IP blocking
+- Integrated threat feeds:
+  - Spamhaus
+  - Emerging Threats
+  - Feodo Tracker
+  - Blocklist.de
 
+> Over 50,000 malicious IP addresses were automatically blocked.
 
+---
 
-* ###### &#x20;Understanding Rule Components
+## 3. DNSBL Domain Filtering
 
-Component		        Options	Example
+Configured DNS-based blocking to prevent access to malicious domains.
 
-Action		    	    Pass, Block, Reject	Block
-  
-Interface	         	WAN, LAN, any interface	LAN
+### Implemented Feeds
 
-Address Family	  	IPv4, IPv6, IPv4+IPv6	IPv4
+- StevenBlack
+- someonewhocares.org
 
-Protocol	        	TCP, UDP, ICMP, Any	TCP
+### Features
 
-Source		        	Any, LAN net, Single IP, Network	LAN net
+- Malware domain blocking
+- DNS-level advertisement filtering
+- Custom block pages
 
-Source Port	      	Any, specific port	Any (clients use random ports)
+---
 
-Destination      		Any, Single IP, Network, Alias	Any
+## 4. DHCP Server Configuration
 
-Destination Port   	Any, HTTP(80), HTTPS(443), SSH(22)	22
+Configured centralized DHCP services for client devices.
 
-Description	      	Your notes about this rule	Block SSH from LAN
+### Features
 
-Log		            	Enable to record matches in logs	Enabled for important rules
+- Automatic IP allocation
+- Static DHCP mappings
+- DORA process implementation
 
-State Type	      	Keep state, Sloppy state, None	Keep state (default)
+### DHCP Lease Monitoring
 
-<img width="719" height="389" alt="Firewall-Rule" src="https://github.com/user-attachments/assets/53ee103c-c7f4-4587-8383-c9f2811d2e30" />
+![DHCP Lease](https://github.com/user-attachments/assets/d1989ec4-367c-4a93-a89a-b3d98a252021)
 
+---
 
+## 5. DNS Resolver Configuration
 
-* ###### &#x20;  Difference: Block vs Reject
+Implemented secure local DNS resolution.
 
-Action	What Happens				                    Attacker Sees				                       When to Use
-  
-Block	Packet is silently dropped	  	          Connection times out (no response)	       WAN rules — hide that firewall exists
+### Features
 
-Reject	Packet dropped + error sent back	      Connection refused (immediate response)	   LAN rules — tell users they are blocked
+- Local DNS caching
+- DNSSEC validation
+- Host overrides
 
-Pass	Packet is allowed through		              Normal connection			                      Allowed traffic
+![DNS Resolver](https://github.com/user-attachments/assets/c1ebf96f-aadb-45e5-9c9a-1c35de279db6)
 
+---
 
+## 6. Real-Time Monitoring
 
-* ###### &#x20; Firewall Aliases — Managing Multiple IPs/Ports
-Aliases let you group multiple IPs or ports under one name and use that name in rules. This makes managing many rules much easier.
+Enabled monitoring and logging tools for live traffic analysis.
 
-Create an alias: Firewall > Aliases > Add
-<img width="298" height="725" alt="Aliases Ip&#39;s" src="https://github.com/user-attachments/assets/f267401e-d82d-453b-944a-e92dc7db6c2c" />
+### Monitoring Tools
 
-* ###### &#x20; Blocking IP after Settimg up Rules in Firewall
+- Firewall log analysis
+- pfTop traffic monitoring
+- Live connection tracking
 
-  <img width="1634" height="108" alt="Blocking Aliases Ip&#39;s" src="https://github.com/user-attachments/assets/bf046aa9-3a3e-4948-83ed-83fb7620b600" />
+---
 
+# 📸 Screenshots
 
+## Dashboard
 
-\### 2. pfBlockerNG IP Blocking
+![Dashboard](screenshots/1-pfsense-dashboard.png)
 
-\- INBOUND blocking on WAN interface
+---
 
-\- OUTBOUND blocking on LAN interface
+## Firewall Rules
 
-\- Threat feeds: Spamhaus, Emerging Threats,
+![Firewall Rules](screenshots/2-firewall-rules.png)
 
-&#x20; Feodo Tracker, Blocklist.de
+---
 
-\- 50,000+ malicious IPs blocked automatically
+## pfBlockerNG Configuration
 
+![pfBlockerNG](screenshots/3-pfblockerng-setup.png)
 
+---
 
-\### 3. DNSBL Domain Filtering
+## Live Threat Blocking
 
-\- DNS-level malware domain blocking
+![Threat Alerts](screenshots/4-pfblockerng-alerts.png)
 
-\- Custom block page displayed to users
+---
 
-\- Feeds: StevenBlack, someonewhocares.org
+# 📚 Concepts Demonstrated
 
+- Network Segmentation (LAN/WAN)
+- Stateful Packet Inspection
+- Defense in Depth
+- Threat Intelligence Integration
+- DHCP & DNS Management
+- Traffic Analysis
+- Security Monitoring & Logging
 
+---
 
-\### 4. DHCP Server
+# 🎓 Skills Acquired
 
-\- Auto IP assignment (192.168.1.100-200)
+- Network Security
+- Firewall Administration
+- DHCP & DNS Configuration
+- NAT & Routing
+- pfBlockerNG Management
+- Traffic Monitoring
+- Linux Administration
+- Troubleshooting & Log Analysis
 
-\- Static mappings for consistent IPs
+---
 
-\- DORA process configured
+# 📂 Repository Structure
 
-\### DHCP LEASE
-
-<img width="911" height="457" alt="DHCP-Lease" src="https://github.com/user-attachments/assets/d1989ec4-367c-4a93-a89a-b3d98a252021" />
-
-
-
-
-\### 5. DNS Resolver
-
-\- Local DNS caching
-
-\- DNSSEC validation enabled
-
-\- Custom host overrides
-
-<img width="681" height="389" alt="DNS RESOLVER" src="https://github.com/user-attachments/assets/c1ebf96f-aadb-45e5-9c9a-1c35de279db6" />
-
-
-\### 6. Real-time Monitoring
-
-\- Firewall logs analysis
-
-\- pfTop live traffic monitoring
-
-\---
-
-
-
-**## 📸 Screenshots**
-
-\### Dashboard
-
-!\[Dashboard](screenshots/1-pfsense-dashboard.png)
-
-
-
-\### Firewall Rules
-
-!\[Rules](screenshots/2-firewall-rules.png)
-
-
-
-\### pfBlockerNG Active
-
-!\[pfBlockerNG](screenshots/3-pfblockerng-setup.png)
-
-
-
-\### Live Threat Blocking
-
-!\[Alerts](screenshots/4-pfblockerng-alerts.png)
-
-
-
-\---
-
-
-
-**## 📚 Concepts Demonstrated**
-
-\- Network Segmentation (LAN/WAN)
-
-\- Defense in Depth
-
-\- Stateful Firewall Inspection
-
-\- Threat Intelligence Integration
-
-\- DHCP and DNS Management
-
-\- Network Traffic Analysis
-
-\- Security Log Analysis
-
-
-
-\---
-
-
-
-\## 🎓 Skills Gained
-
-Network Security | Firewall Management | DHCP
-
-DNS Configuration | NAT | pfBlockerNG | VLANs
-
-Traffic Analysis | Troubleshooting | Linux
-
-
-
-\---
-
-
-
-\## 📂 Repository Structure
-
+```bash
 pfsense-firewall-lab/
-
+│
 ├── README.md
+├── screenshots/      # Lab screenshots
+├── docs/             # Network diagrams & documentation
+└── configs/          # Exported firewall configurations
+```
 
-├── screenshots/     ← All lab screenshots
+---
 
-├── docs/           ← Network diagrams, guides
+# 🔗 References
 
-└── configs/        ← Exported firewall rules
+- pfSense Documentation  
+  `https://docs.netgate.com/pfsense`
 
-
-
-\---
-
-
-
-\## 🔗 References
-
-\- pfSense Documentation: docs.netgate.com
-
-\- pfBlockerNG Guide: docs.netgate.com/pfsense
-
+- pfBlockerNG Documentation  
+  `https://docs.netgate.com/pfsense/en/latest/packages/pfblocker.html`
