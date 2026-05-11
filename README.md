@@ -64,21 +64,21 @@ network environment.
 
 **2.1 Prerequisites — What You Need**
 
-Requirement		Minimum		Recommended
+Requirement		              Minimum		    Recommended
 
-RAM for pfSense VM	512 MB		1024 MB
+RAM for pfSense VM	        512 MB		    1024 MB
 
-Storage for pfSense VM	4 GB		8 GB
+Storage for pfSense VM    	4 GB		      8 GB
 
-RAM for each Client VM	1 GB		2 GB
+RAM for each Client VM    	1 GB		      2 GB
 
-Your PC Total RAM	8 GB		16 GB
+Your PC Total RAM	          8 GB	  	    16 GB
+  
+Your PC Storage		          50 GB free  	100 GB free
 
-Your PC Storage		50 GB free	100 GB free
+VirtualBox Version	        6.x		        7.x (latest)
 
-VirtualBox Version	6.x		7.x (latest)
-
-pfSense Version		2.6.x		2.7.x (latest)
+pfSense Version	          	2.6.x	       	2.7.x (latest)
 
 
 
@@ -146,6 +146,8 @@ Adapter 1 (WAN — Internet Side):
 
 &#x20;   • This gives pfSense access to your real internet
 
+<img width="704" height="384" alt="Virtual Machine Adapter Config (2)" src="https://github.com/user-attachments/assets/7edf61be-f63c-4152-9bd3-35ef8785aa55" />
+
 
 
 Adapter 2 (LAN — Client Side):
@@ -157,6 +159,8 @@ Adapter 2 (LAN — Client Side):
 &#x20;   • Name: labnet
 
 &#x20;   • This creates a private network for client VMs
+
+<img width="967" height="641" alt="Virtual Machine Adapter Config" src="https://github.com/user-attachments/assets/e49aaad4-1866-490c-bfa8-9965787019ac" />
 
 
 
@@ -272,6 +276,8 @@ Start address: 192.168.1.100
 
 End address: 192.168.1.200
 
+<img width="700" height="341" alt="DHCP-Setting" src="https://github.com/user-attachments/assets/e15c7726-fbcd-41d5-bf87-228f8fae5730" />
+
 
 
 **Revert to HTTP: y**
@@ -295,6 +301,8 @@ The Web GUI (Graphical User Interface) is how you manage pfSense. It is a web pa
 3. &#x20;   Type in address bar: http://192.168.1.1
 4. &#x20;   Username: admin
 5. &#x20;   Password: pfsense (default — change this after setup!)
+
+<img width="828" height="761" alt="PfSense-DashBoard" src="https://github.com/user-attachments/assets/0db1a0a5-ffcd-441a-8b60-18e27dff67fa" />
 
 
 
@@ -326,43 +334,55 @@ Firewall rules are instructions that tell pfSense what to do with network traffi
 
 * ###### &#x20;Understanding Rule Components
 
-Component		Options	Example
+Component		        Options	Example
 
-Action			Pass, Block, Reject	Block
+Action		    	    Pass, Block, Reject	Block
+  
+Interface	         	WAN, LAN, any interface	LAN
 
-Interface		WAN, LAN, any interface	LAN
+Address Family	  	IPv4, IPv6, IPv4+IPv6	IPv4
 
-Address Family		IPv4, IPv6, IPv4+IPv6	IPv4
+Protocol	        	TCP, UDP, ICMP, Any	TCP
 
-Protocol		TCP, UDP, ICMP, Any	TCP
+Source		        	Any, LAN net, Single IP, Network	LAN net
 
-Source			Any, LAN net, Single IP, Network	LAN net
+Source Port	      	Any, specific port	Any (clients use random ports)
 
-Source Port		Any, specific port	Any (clients use random ports)
+Destination      		Any, Single IP, Network, Alias	Any
 
-Destination		Any, Single IP, Network, Alias	Any
+Destination Port   	Any, HTTP(80), HTTPS(443), SSH(22)	22
 
-Destination Port	Any, HTTP(80), HTTPS(443), SSH(22)	22
+Description	      	Your notes about this rule	Block SSH from LAN
 
-Description		Your notes about this rule	Block SSH from LAN
+Log		            	Enable to record matches in logs	Enabled for important rules
 
-Log			Enable to record matches in logs	Enabled for important rules
+State Type	      	Keep state, Sloppy state, None	Keep state (default)
 
-State Type		Keep state, Sloppy state, None	Keep state (default)
+<img width="719" height="389" alt="Firewall-Rule" src="https://github.com/user-attachments/assets/53ee103c-c7f4-4587-8383-c9f2811d2e30" />
 
 
 
 * ###### &#x20;  Difference: Block vs Reject
 
-Action	What Happens				Attacker Sees				 When to Use
+Action	What Happens				                    Attacker Sees				                       When to Use
+  
+Block	Packet is silently dropped	  	          Connection times out (no response)	       WAN rules — hide that firewall exists
 
-Block	Packet is silently dropped		Connection times out (no response)	 WAN rules — hide that firewall exists
+Reject	Packet dropped + error sent back	      Connection refused (immediate response)	   LAN rules — tell users they are blocked
 
-Reject	Packet dropped + error sent back	Connection refused (immediate response)	 LAN rules — tell users they are blocked
-
-Pass	Packet is allowed through		Normal connection			 Allowed traffic
+Pass	Packet is allowed through		              Normal connection			                      Allowed traffic
 
 
+
+* ###### &#x20; Firewall Aliases — Managing Multiple IPs/Ports
+Aliases let you group multiple IPs or ports under one name and use that name in rules. This makes managing many rules much easier.
+
+Create an alias: Firewall > Aliases > Add
+<img width="298" height="725" alt="Aliases Ip&#39;s" src="https://github.com/user-attachments/assets/f267401e-d82d-453b-944a-e92dc7db6c2c" />
+
+* ###### &#x20; Blocking IP after Settimg up Rules in Firewall
+
+  <img width="1634" height="108" alt="Blocking Aliases Ip&#39;s" src="https://github.com/user-attachments/assets/bf046aa9-3a3e-4948-83ed-83fb7620b600" />
 
 
 
@@ -398,6 +418,11 @@ Pass	Packet is allowed through		Normal connection			 Allowed traffic
 
 \- DORA process configured
 
+\### DHCP LEASE
+
+<img width="911" height="457" alt="DHCP-Lease" src="https://github.com/user-attachments/assets/d1989ec4-367c-4a93-a89a-b3d98a252021" />
+
+
 
 
 \### 5. DNS Resolver
@@ -408,6 +433,7 @@ Pass	Packet is allowed through		Normal connection			 Allowed traffic
 
 \- Custom host overrides
 
+<img width="681" height="389" alt="DNS RESOLVER" src="https://github.com/user-attachments/assets/c1ebf96f-aadb-45e5-9c9a-1c35de279db6" />
 
 
 \### 6. Real-time Monitoring
@@ -459,8 +485,6 @@ Pass	Packet is allowed through		Normal connection			 Allowed traffic
 \- Stateful Firewall Inspection
 
 \- Threat Intelligence Integration
-
-\- NAT and Port Forwarding
 
 \- DHCP and DNS Management
 
